@@ -1,0 +1,72 @@
+import { useState } from 'react';
+import { api } from '../api';
+
+export default function QuoteModal({ product, onClose }) {
+  const [sent, setSent] = useState(false);
+  const [form, setForm] = useState({ name: '', phone: '', qty: 100, message: '' });
+  const [error, setError] = useState('');
+
+  if (!product) return null;
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+    try {
+      await api.submitQuote({ productId: product._id, ...form });
+      setSent(true);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  return (
+    <div className="overlay">
+      <div className="modal">
+        <button className="close" onClick={onClose}>&times;</button>
+        {!sent ? (
+          <>
+            <h3>Request a quote</h3>
+            <p className="sub">For {product.name}</p>
+            <form onSubmit={handleSubmit}>
+              <div className="field">
+                <label>Full name</label>
+                <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Phone</label>
+                <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Quantity (sq. ft)</label>
+                <input required type="number" min="1" value={form.qty} onChange={(e) => setForm({ ...form, qty: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Message (optional)</label>
+                <textarea
+                  placeholder="Delivery city, timeline, finish preference…"
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                />
+              </div>
+              {error && <p style={{ color: 'var(--sandstone)', fontSize: 13, marginBottom: 12 }}>{error}</p>}
+              <button className="btn btn-brass" style={{ width: '100%' }} type="submit">Submit request</button>
+            </form>
+          </>
+        ) : (
+          <div className="confirm">
+            <div className="checkmark">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#132140" strokeWidth="2.4">
+                <path d="M4 12l5 5L20 6" />
+              </svg>
+            </div>
+            <h3>Request sent</h3>
+            <p style={{ color: 'var(--stone-grey)', fontSize: 14, marginTop: 8 }}>
+              We'll get back to you with pricing within 24 hours.
+            </p>
+            <button className="btn btn-outline" style={{ marginTop: 20 }} onClick={onClose}>Close</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

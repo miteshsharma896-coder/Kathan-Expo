@@ -1,4 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const ASSET_BASE = API_URL.replace(/\/api\/?$/, '');
+
+// Turns a stored path like "/uploads/123-photo.jpg" into a full URL the browser can load
+export function assetUrl(path) {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${ASSET_BASE}${path}`;
+}
 
 async function request(path, options = {}) {
   const res = await fetch(`${API_URL}${path}`, {
@@ -37,6 +45,22 @@ export const api = {
 
   submitMessage: (data) => request('/messages', { method: 'POST', body: JSON.stringify(data) }),
   getMessages: () => request('/messages', { headers: authHeader() }),
+
+  // Uploads a single image file (multipart) and returns { url }
+  uploadImage: async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch(`${API_URL}/upload`, {
+      method: 'POST',
+      headers: authHeader(), // no Content-Type here - browser sets the multipart boundary itself
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Upload failed (${res.status})`);
+    }
+    return res.json();
+  },
 
   login: (username, password) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),

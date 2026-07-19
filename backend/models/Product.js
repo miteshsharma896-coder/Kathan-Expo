@@ -9,6 +9,7 @@ const productSchema = new mongoose.Schema(
     thickness: { type: String, required: true },
     finish: { type: String, required: true },
     description: { type: String, default: '' },
+    images: { type: [String], default: [] },
   },
   { timestamps: true }
 );

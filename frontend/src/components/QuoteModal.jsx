@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api';
+import PhoneField from './PhoneField';
 
 export default function QuoteModal({ product, onClose }) {
   const [sent, setSent] = useState(false);
@@ -29,15 +30,15 @@ export default function QuoteModal({ product, onClose }) {
             <p className="sub">For {product.name}</p>
             <form onSubmit={handleSubmit}>
               <div className="field">
-                <label>Full name</label>
+                <label>Full name<span className="required-mark">*</span></label>
                 <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="field">
-                <label>Phone</label>
-                <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <label>Phone<span className="required-mark">*</span></label>
+                <PhoneField value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
               </div>
               <div className="field">
-                <label>Quantity (sq. ft)</label>
+                <label>Quantity (sq. ft)<span className="required-mark">*</span></label>
                 <input required type="number" min="1" value={form.qty} onChange={(e) => setForm({ ...form, qty: e.target.value })} />
               </div>
               <div className="field">

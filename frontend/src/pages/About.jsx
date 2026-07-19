@@ -1,7 +1,7 @@
 export default function About() {
   return (
     <>
-      <section className="band dark">
+      <section className="band dark marble-texture">
         <div className="band-inner" style={{ maxWidth: 720 }}>
           <span className="eyebrow">● Our story</span>
           <h2 style={{ color: 'var(--ivory)', fontSize: 34, margin: '22px 0 16px' }}>
@@ -12,14 +12,14 @@ export default function About() {
             drive from Makrana's white-marble quarries and Kishangarh's processing units, which
             together supply a large share of India's dimension stone. We started as a small
             trading desk taking orders by phone; this site is us putting that same catalog
-            online, at the same prices we quote our regular buyers.
+            online, quoting each order the same way we always have.
           </p>
         </div>
       </section>
       <section className="band light">
         <div className="band-inner" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 32 }}>
           <Point title="SOURCING" heading="Straight from the belt" body="Every slab is sourced directly from quarries and processing units in Makrana, Kishangarh, Rajnagar, Jalore and Dholpur — no intermediate trader." />
-          <Point title="PRICING" heading="One price, quoted openly" body="Prices shown per square foot are the same ones we give our long-standing dealer and contractor clients." />
+          <Point title="PRICING" heading="Quoted, not listed" body="We don't publish prices on the site — every buyer gets a quote based on quantity, finish and delivery location, the same way we've always worked with our dealer and contractor clients." />
           <Point title="DELIVERY" heading="Crated and dispatched" body="Slabs are crated at our Kishangarh unit and dispatched across India; timelines depend on quantity and finish." />
         </div>
       </section>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
+import PhoneField from '../components/PhoneField';
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
@@ -29,19 +30,19 @@ export default function Contact() {
             </p>
             <form onSubmit={handleSubmit}>
               <div className="field">
-                <label>Full name</label>
+                <label>Full name<span className="required-mark">*</span></label>
                 <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="field">
-                <label>Phone</label>
-                <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <label>Phone<span className="required-mark">*</span></label>
+                <PhoneField value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
               </div>
               <div className="field">
-                <label>Email</label>
+                <label>Email<span className="required-mark">*</span></label>
                 <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
               <div className="field">
-                <label>Message</label>
+                <label>Message<span className="required-mark">*</span></label>
                 <textarea required value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
               </div>
               {error && <p style={{ color: 'var(--sandstone)', fontSize: 13, marginBottom: 12 }}>{error}</p>}

@@ -28,13 +28,13 @@ export default function Home() {
 
   return (
     <>
-      <section className="hero">
+      <section className="hero marble-texture">
         <div className="hero-inner">
           <span className="eyebrow">● Direct from Rajasthan's marble belt</span>
           <h1>Stone from the source, not the middleman.</h1>
           <p className="lead">
             Yatharth Emerald Stones sources slabs and tiles straight from the quarries and processing units of
-            Makrana and Kishangarh — priced by the square foot, no showroom markup.
+            Makrana and Kishangarh — quoted directly, no showroom markup.
           </p>
           <div className="search-bar">
             <input
@@ -62,7 +62,7 @@ export default function Home() {
             <div className="band-inner" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 24, borderBottom: '1px solid var(--line)', paddingBottom: 40 }}>
               <Stat n={products.length} label="Stone varieties listed" />
               <Stat n={categories.length} label="Quarry regions covered" />
-              <Stat n="Live" label="Prices from the database" />
+              <Stat n="Direct" label="Quotes from our own stock" />
               <Stat n="24 hrs" label="Typical quote turnaround" />
             </div>
           </section>
@@ -91,7 +91,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="band dark">
+          <section className="band dark marble-texture">
             <div className="band-inner">
               <div className="section-head">
                 <div>
@@ -112,7 +112,7 @@ export default function Home() {
       <section className="band light">
         <div className="band-inner" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 32 }}>
           <Step n="01 — REQUEST" title="Send us your requirement" body="Tell us the stone, quantity in sq. ft., and finish you need." />
-          <Step n="02 — QUOTE" title="We price it directly" body="Straight from our processing unit — no showroom margin added." />
+          <Step n="02 — QUOTE" title="We quote it directly" body="Straight from our processing unit — no showroom margin added." />
           <Step n="03 — DISPATCH" title="Slabs reach your site" body="Crated and dispatched from Kishangarh to your location." />
         </div>
       </section>

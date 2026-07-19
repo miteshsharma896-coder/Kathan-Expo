@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api } from '../api';
+import { api, assetUrl } from '../api';
 import { marbleSVG, seedFromId } from '../utils/marble';
 import { useWishlist } from '../context/WishlistContext';
 import QuoteModal from '../components/QuoteModal';
@@ -17,6 +17,7 @@ export default function ProductDetail() {
   useEffect(() => {
     setNotFound(false);
     setProduct(null);
+    setActiveShot(0);
     Promise.all([api.getProduct(id), api.getCategories()])
       .then(([p, cats]) => {
         setProduct(p);
@@ -37,8 +38,17 @@ export default function ProductDetail() {
 
   const cat = categories.find((c) => c.slug === product.category);
   const wished = wishlist.has(product._id);
-  const seedBase = seedFromId(product._id);
-  const shots = cat ? [1, 2, 3].map((i) => marbleSVG(seedBase * 13 + i * 29, cat.colorBase, cat.colorVein)) : [];
+  const hasPhotos = product.images && product.images.length > 0;
+
+  let gallery; // array of { type: 'photo' | 'generated', value }
+  if (hasPhotos) {
+    gallery = product.images.map((img) => ({ type: 'photo', value: assetUrl(img) }));
+  } else {
+    const seedBase = seedFromId(product._id);
+    gallery = cat
+      ? [1, 2, 3].map((i) => ({ type: 'generated', value: marbleSVG(seedBase * 13 + i * 29, cat.colorBase, cat.colorVein) }))
+      : [];
+  }
 
   return (
     <>
@@ -47,23 +57,30 @@ export default function ProductDetail() {
       </div>
       <div className="pd-wrap">
         <div>
-          <div className="pd-gallery-main" dangerouslySetInnerHTML={{ __html: shots[activeShot] }} />
+          <div className="pd-gallery-main">
+            {gallery[activeShot]?.type === 'photo' ? (
+              <img src={gallery[activeShot].value} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <div dangerouslySetInnerHTML={{ __html: gallery[activeShot]?.value || '' }} />
+            )}
+          </div>
           <div className="pd-thumbs">
-            {shots.map((s, i) => (
-              <div
-                key={i}
-                className={`t ${i === activeShot ? 'active' : ''}`}
-                onClick={() => setActiveShot(i)}
-                dangerouslySetInnerHTML={{ __html: s }}
-              />
+            {gallery.map((shot, i) => (
+              <div key={i} className={`t ${i === activeShot ? 'active' : ''}`} onClick={() => setActiveShot(i)}>
+                {shot.type === 'photo' ? (
+                  <img src={shot.value} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div dangerouslySetInnerHTML={{ __html: shot.value }} />
+                )}
+              </div>
             ))}
           </div>
         </div>
         <div className="pd-info">
           <div className="origin">{product.origin}</div>
           <h1>{product.name}</h1>
-          <div className="price">
-            ₹{product.price} <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, color: 'var(--stone-grey)', fontWeight: 400 }}>/ sq.ft</span>
+          <div className="mono" style={{ fontSize: 13, color: 'var(--brass)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 20 }}>
+            Price on request — send a quote request below
           </div>
           <p className="desc">{product.description}</p>
           <div className="spec-table">

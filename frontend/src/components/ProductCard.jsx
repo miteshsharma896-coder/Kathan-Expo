@@ -1,15 +1,21 @@
 import { Link } from 'react-router-dom';
 import { productThumb } from '../utils/marble';
 import { useWishlist } from '../context/WishlistContext';
+import { assetUrl } from '../api';
 
 export default function ProductCard({ product, categories, onQuote }) {
   const { wishlist, toggle } = useWishlist();
   const wished = wishlist.has(product._id);
+  const hasPhoto = product.images && product.images.length > 0;
 
   return (
     <Link className="card" to={`/product/${product._id}`}>
       <div className="thumb">
-        <div dangerouslySetInnerHTML={{ __html: productThumb(product, categories) }} />
+        {hasPhoto ? (
+          <img src={assetUrl(product.images[0])} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <div dangerouslySetInnerHTML={{ __html: productThumb(product, categories) }} />
+        )}
         <div
           className={`heart ${wished ? 'active' : ''}`}
           onClick={(e) => {
@@ -31,10 +37,7 @@ export default function ProductCard({ product, categories, onQuote }) {
           <span>{product.finish}</span>
         </div>
         <div className="price-row">
-          <div className="price">
-            ₹{product.price}
-            <span> /sq.ft</span>
-          </div>
+          <span className="mono" style={{ fontSize: 11.5, color: 'var(--stone-grey)' }}>Price on request</span>
           <button
             className="btn btn-outline"
             style={{ padding: '8px 14px', fontSize: 12 }}

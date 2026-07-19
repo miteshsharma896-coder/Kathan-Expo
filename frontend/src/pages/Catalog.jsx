@@ -13,7 +13,6 @@ export default function Catalog() {
 
   const [activeCats, setActiveCats] = useState(() => new Set(searchParams.get('cat') ? [searchParams.get('cat')] : []));
   const [search, setSearch] = useState(searchParams.get('q') || '');
-  const [maxPrice, setMaxPrice] = useState(600);
 
   useEffect(() => {
     api.getCategories().then(setCategories);
@@ -22,13 +21,13 @@ export default function Catalog() {
   useEffect(() => {
     setLoading(true);
     api
-      .getProducts({ search, maxPrice })
+      .getProducts({ search })
       .then((all) => {
         const filtered = activeCats.size ? all.filter((p) => activeCats.has(p.category)) : all;
         setProducts(filtered);
       })
       .finally(() => setLoading(false));
-  }, [search, maxPrice, activeCats]);
+  }, [search, activeCats]);
 
   function toggleCat(slug, checked) {
     setActiveCats((prev) => {
@@ -39,7 +38,6 @@ export default function Catalog() {
   }
   function resetFilters() {
     setActiveCats(new Set());
-    setMaxPrice(600);
     setSearch('');
     setSearchParams({});
   }
@@ -75,16 +73,11 @@ export default function Catalog() {
                   </label>
                 ))}
               </div>
-              <div className="filter-group">
-                <h3>Max price (₹/sq.ft)</h3>
-                <input type="range" min="80" max="600" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} />
-                <div className="price-readout">Up to ₹{maxPrice}/sq.ft</div>
-              </div>
               <button className="btn btn-outline" style={{ width: '100%' }} onClick={resetFilters}>Reset filters</button>
             </aside>
             <div className="prod-grid">
               {!loading && products.length === 0 && (
-                <div className="empty">No stone matches those filters. Try widening your price range.</div>
+                <div className="empty">No stone matches that search. Try a different keyword or category.</div>
               )}
               {products.map((p) => (
                 <ProductCard key={p._id} product={p} categories={categories} onQuote={setQuoteProduct} />

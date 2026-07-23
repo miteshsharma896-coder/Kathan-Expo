@@ -28,6 +28,9 @@ function authHeader() {
 
 export const api = {
   getCategories: () => request('/categories'),
+  createCategory: (data) => request('/categories', { method: 'POST', headers: authHeader(), body: JSON.stringify(data) }),
+  updateCategory: (id, data) => request(`/categories/${id}`, { method: 'PUT', headers: authHeader(), body: JSON.stringify(data) }),
+  deleteCategory: (id) => request(`/categories/${id}`, { method: 'DELETE', headers: authHeader() }),
 
   getProducts: (params = {}) => {
     const qs = new URLSearchParams(

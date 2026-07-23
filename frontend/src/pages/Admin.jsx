@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { marbleSVG } from '../utils/marble';
 
 const emptyForm = { name: '', category: '', origin: '', price: '', thickness: '', finish: '', images: [] };
+const emptyCatForm = { slug: '', name: '', colorBase: '#DCC9A6', colorVein: '#9C7B4B' };
 const MAX_IMAGES = 4;
 
 export default function Admin() {
@@ -59,6 +60,44 @@ function Panel({ logout }) {
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+
+  const [catFormOpen, setCatFormOpen] = useState(false);
+  const [catForm, setCatForm] = useState(emptyCatForm);
+  const [catEditingId, setCatEditingId] = useState(null);
+  const [catError, setCatError] = useState('');
+
+  function openAddCategory() {
+    setCatForm(emptyCatForm);
+    setCatEditingId(null);
+    setCatError('');
+    setCatFormOpen(true);
+  }
+  function openEditCategory(c) {
+    setCatForm({ slug: c.slug, name: c.name, colorBase: c.colorBase, colorVein: c.colorVein });
+    setCatEditingId(c._id);
+    setCatError('');
+    setCatFormOpen(true);
+  }
+  async function handleSaveCategory(e) {
+    e.preventDefault();
+    setCatError('');
+    try {
+      if (catEditingId) await api.updateCategory(catEditingId, catForm);
+      else await api.createCategory(catForm);
+      setCatFormOpen(false);
+      loadAll();
+    } catch (err) {
+      setCatError(err.message);
+    }
+  }
+  async function handleDeleteCategory(id) {
+    try {
+      await api.deleteCategory(id);
+      loadAll();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
 
   function loadAll() {
     api.getCategories().then(setCategories);
@@ -144,6 +183,7 @@ function Panel({ logout }) {
         <aside className="admin-sidenav">
           <button className={tab === 'dashboard' ? 'active' : ''} onClick={() => setTab('dashboard')}>Dashboard</button>
           <button className={tab === 'products' ? 'active' : ''} onClick={() => setTab('products')}>Products</button>
+          <button className={tab === 'categories' ? 'active' : ''} onClick={() => setTab('categories')}>Categories</button>
           <button className={tab === 'inquiries' ? 'active' : ''} onClick={() => setTab('inquiries')}>Quote requests</button>
           <button className={tab === 'messages' ? 'active' : ''} onClick={() => setTab('messages')}>Contact messages</button>
         </aside>
@@ -184,6 +224,37 @@ function Panel({ logout }) {
                       </tr>
                     );
                   })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {tab === 'categories' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
+                <button className="btn btn-brass" onClick={openAddCategory}>+ Add category</button>
+              </div>
+              <table>
+                <thead>
+                  <tr><th></th><th>Name</th><th>Slug</th><th>Products using it</th><th></th></tr>
+                </thead>
+                <tbody>
+                  {categories.map((c) => {
+                    const count = products.filter((p) => p.category === c.slug).length;
+                    return (
+                      <tr key={c._id}>
+                        <td><div className="swatch-sm" dangerouslySetInnerHTML={{ __html: marbleSVG(c.slug.length + 3, c.colorBase, c.colorVein) }} /></td>
+                        <td>{c.name}</td>
+                        <td className="mono" style={{ fontSize: 12, color: 'var(--stone-grey)' }}>{c.slug}</td>
+                        <td>{count}</td>
+                        <td className="row-actions">
+                          <button onClick={() => openEditCategory(c)}>Edit</button>
+                          <button onClick={() => handleDeleteCategory(c._id)}>Delete</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {categories.length === 0 && <tr><td colSpan="5" className="empty">No categories yet.</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -291,6 +362,67 @@ function Panel({ logout }) {
               <button className="btn btn-brass" style={{ width: '100%' }} type="submit" disabled={uploading}>
                 Save product
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {catFormOpen && (
+        <div className="overlay">
+          <div className="modal">
+            <button className="close" onClick={() => setCatFormOpen(false)}>&times;</button>
+            <h3>{catEditingId ? 'Edit category' : 'Add category'}</h3>
+            <p className="sub">Used to group products and color their generated swatch.</p>
+            <form onSubmit={handleSaveCategory}>
+              <div className="field">
+                <label>Name<span className="required-mark">*</span></label>
+                <input
+                  required
+                  placeholder="e.g. Rajasthan Granite"
+                  value={catForm.name}
+                  onChange={(e) => setCatForm({ ...catForm, name: e.target.value })}
+                />
+              </div>
+              <div className="field">
+                <label>Slug<span className="required-mark">*</span></label>
+                <input
+                  required
+                  placeholder="e.g. granite (no spaces, lowercase)"
+                  value={catForm.slug}
+                  onChange={(e) => setCatForm({ ...catForm, slug: e.target.value.trim().toLowerCase().replace(/\s+/g, '-') })}
+                  disabled={!!catEditingId}
+                />
+                {catEditingId && (
+                  <p style={{ fontSize: 11.5, color: 'var(--stone-grey)', marginTop: 6 }}>
+                    Slug can't be changed once products are using it.
+                  </p>
+                )}
+              </div>
+              <div className="field">
+                <label>Swatch base color<span className="required-mark">*</span></label>
+                <input
+                  required
+                  type="color"
+                  value={catForm.colorBase}
+                  onChange={(e) => setCatForm({ ...catForm, colorBase: e.target.value })}
+                  style={{ height: 42, padding: 4 }}
+                />
+              </div>
+              <div className="field">
+                <label>Swatch vein color<span className="required-mark">*</span></label>
+                <input
+                  required
+                  type="color"
+                  value={catForm.colorVein}
+                  onChange={(e) => setCatForm({ ...catForm, colorVein: e.target.value })}
+                  style={{ height: 42, padding: 4 }}
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div className="swatch-sm" style={{ width: 64, height: 64 }} dangerouslySetInnerHTML={{ __html: marbleSVG(7, catForm.colorBase, catForm.colorVein) }} />
+              </div>
+              {catError && <p style={{ color: 'var(--sandstone)', fontSize: 13, marginBottom: 12 }}>{catError}</p>}
+              <button className="btn btn-brass" style={{ width: '100%' }} type="submit">Save category</button>
             </form>
           </div>
         </div>

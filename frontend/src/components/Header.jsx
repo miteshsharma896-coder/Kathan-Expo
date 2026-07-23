@@ -23,7 +23,6 @@ export default function Header() {
             Wishlist<span className="badge">{wishlist.size}</span>
           </NavLink>
           <NavLink to="/contact" className={navClass}>Contact</NavLink>
-          <NavLink to="/admin" className={navClass}>Admin</NavLink>
         </nav>
       </div>
     </header>

@@ -20,7 +20,6 @@ export default function Footer() {
           <div>
             <h5>Company</h5>
             <Link to="/about">About us</Link>
-            <Link to="/admin">Admin</Link>
           </div>
         </div>
       </div>

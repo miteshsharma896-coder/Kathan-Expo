@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product — MarbleHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="logo" href="index.html">
+      <svg class="mark" viewBox="0 0 24 24"><path d="M3 20 L3 10 L12 4 L21 10 L21 20 Z" fill="none" stroke="#B08D57" stroke-width="1.4"/><path d="M3 10 L12 16 L21 10" fill="none" stroke="#B08D57" stroke-width="1.4"/></svg>
+      MarbleHub
+    </a>
+    <nav class="navlinks">
+      <a href="index.html">Home</a>
+      <a href="catalog.html" class="active">Catalog</a>
+      <a href="about.html">About</a>
+      <a href="wishlist.html">Wishlist<span class="badge" id="wishCount">0</span></a>
+      <a href="contact.html">Contact</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div style="max-width:1180px; margin:0 auto; padding:24px 28px 0;">
+    <a class="btn btn-outline" style="padding:8px 16px; font-size:13px;" href="catalog.html">← Back to catalog</a>
+  </div>
+  <div class="pd-wrap" id="pdWrap"></div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="logo" style="color:var(--ivory); margin-bottom:12px;">MarbleHub</div>
+      <p style="max-width:260px; line-height:1.6;">Marble, granite and sandstone sourced directly from Rajasthan's quarries.</p>
+    </div>
+    <div class="cols">
+      <div>
+        <h5>Explore</h5>
+        <a href="catalog.html">Catalog</a>
+        <a href="wishlist.html">Wishlist</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <a href="about.html">About us</a>
+        <a href="admin.html">Admin</a>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bottom">Demo build — MarbleHub is a working sample, not yet a hosted product.</div>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+  const id = Number(new URLSearchParams(window.location.search).get('id'));
+  const products = getProducts();
+  const p = products.find(x=>x.id===id);
+
+  function swapPdMain(el){
+    document.querySelectorAll('.pd-thumbs .t').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('pdMain').innerHTML = el.innerHTML;
+  }
+  function refreshPdWishBtn(){
+    const btn = document.getElementById('pdWishBtn');
+    if(btn) btn.textContent = getWishlist().has(p.id) ? '♥ Saved' : '♡ Save to wishlist';
+  }
+  function onWishlistChanged(){ refreshPdWishBtn(); }
+
+  if(!p){
+    document.getElementById('pdWrap').innerHTML = `<div class="empty" style="grid-column:1/-1;">This product couldn't be found — it may have been removed. <a href="catalog.html" style="color:var(--brass);">Back to catalog →</a></div>`;
+  } else {
+    document.title = p.name + ' — MarbleHub';
+    const cat = categoryOf(p.cat);
+    const wished = getWishlist().has(p.id);
+    const shots = [1,2,3].map(i=>marbleSVG(p.id*13+i*29, cat.color[0], cat.color[1]));
+    document.getElementById('pdWrap').innerHTML = `
+      <div>
+        <div class="pd-gallery-main" id="pdMain">${shots[0]}</div>
+        <div class="pd-thumbs">
+          ${shots.map((s,i)=>`<div class="t ${i===0?'active':''}" onclick="swapPdMain(this)">${s}</div>`).join('')}
+        </div>
+      </div>
+      <div class="pd-info">
+        <div class="origin">${p.origin}</div>
+        <h1>${p.name}</h1>
+        <div class="price">₹${p.price} <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--stone-grey); font-weight:400;">/ sq.ft</span></div>
+        <p class="desc">${p.desc}</p>
+        <div class="spec-table">
+          <div class="row"><span class="k">Category</span><span>${cat.name}</span></div>
+          <div class="row"><span class="k">Thickness</span><span>${p.thickness}</span></div>
+          <div class="row"><span class="k">Finish</span><span>${p.finish}</span></div>
+          <div class="row"><span class="k">Origin</span><span>${p.origin}</span></div>
+        </div>
+        <div class="pd-actions">
+          <button class="btn btn-brass" onclick="openQuote(${p.id})">Request a quote</button>
+          <button class="btn btn-outline" id="pdWishBtn" onclick="toggleWishlist(${p.id}); refreshPdWishBtn();">${wished?'♥ Saved':'♡ Save to wishlist'}</button>
+        </div>
+      </div>`;
+  }
+</script>
+</body>
+</html>

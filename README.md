@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MarbleHub — MERN version
 
 A real full-stack site now: **M**ongoDB (database) + **E**xpress (API server) +
@@ -154,3 +155,6 @@ will show as broken links.
   real data you care about)
 - Design/colors → `frontend/src/styles.css`
 - Admin password → `backend/.env`
+=======
+# Kathan-Expo
+>>>>>>> f72632f272a258ed0e0f472658379049fe8ce500

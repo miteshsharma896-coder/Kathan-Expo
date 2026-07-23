@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Kathan Expo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="logo" href="index.html">
+      <svg class="mark" viewBox="0 0 24 24"><path d="M3 20 L3 10 L12 4 L21 10 L21 20 Z" fill="none" stroke="#B08D57" stroke-width="1.4"/><path d="M3 10 L12 16 L21 10" fill="none" stroke="#B08D57" stroke-width="1.4"/></svg>
+      Kathan Expo
+    </a>
+    <nav class="navlinks">
+      <a href="index.html">Home</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="about.html">About</a>
+      <a href="wishlist.html">Wishlist<span class="badge" id="wishCount">0</span></a>
+      <a href="contact.html">Contact</a>
+      <a href="admin.html" class="active">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="adminLogin" class="login-box">
+    <h2 style="margin-bottom:6px;">Admin login</h2>
+    <p style="color:var(--stone-grey); font-size:13.5px; margin-bottom:24px;">Demo credentials — username <b>admin</b>, password <b>marble123</b></p>
+    <form id="loginForm">
+      <div class="field"><label>Username</label><input required id="adminUser" type="text"></div>
+      <div class="field"><label>Password</label><input required id="adminPass" type="password"></div>
+      <div id="loginError" style="color:var(--sandstone); font-size:13px; margin-bottom:12px; display:none;">Incorrect username or password.</div>
+      <button class="btn btn-brass" style="width:100%;" type="submit">Log in</button>
+    </form>
+  </div>
+
+  <div id="adminPanel" class="admin-shell hidden">
+    <div class="admin-head">
+      <h2>Admin panel</h2>
+      <button class="btn btn-outline" onclick="adminLogout()">Log out</button>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><div class="num" id="statProducts">0</div><div class="lbl">Products</div></div>
+      <div class="stat"><div class="num" id="statInquiries">0</div><div class="lbl">Quote requests</div></div>
+      <div class="stat"><div class="num" id="statMessages">0</div><div class="lbl">Contact messages</div></div>
+      <div class="stat"><div class="num" id="statWishlist">0</div><div class="lbl">Wishlist saves (this device)</div></div>
+    </div>
+    <div class="tabbar">
+      <button data-tab="products" class="active">Products</button>
+      <button data-tab="inquiries">Quote requests</button>
+      <button data-tab="messages">Contact messages</button>
+    </div>
+    <div id="tab-products">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
+        <button class="btn btn-brass" onclick="openProductForm()">+ Add product</button>
+      </div>
+      <table>
+        <thead><tr><th></th><th>Name</th><th>Category</th><th>Origin</th><th>Price/sq.ft</th><th></th></tr></thead>
+        <tbody id="adminProductRows"></tbody>
+      </table>
+    </div>
+    <div id="tab-inquiries" class="hidden">
+      <table>
+        <thead><tr><th>Product</th><th>Name</th><th>Phone</th><th>Qty (sq.ft)</th><th>Message</th></tr></thead>
+        <tbody id="adminInquiryRows"></tbody>
+      </table>
+    </div>
+    <div id="tab-messages" class="hidden">
+      <table>
+        <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Message</th></tr></thead>
+        <tbody id="adminMessageRows"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div id="productFormOverlay" class="overlay hidden">
+  <div class="modal">
+    <button class="close" onclick="closeProductForm()">&times;</button>
+    <h3 id="pfTitle">Add product</h3>
+    <p class="sub">Changes save to this browser's storage.</p>
+    <form id="productForm">
+      <input type="hidden" id="pfId">
+      <div class="field"><label>Name</label><input required id="pfName" type="text"></div>
+      <div class="field"><label>Category</label><select required id="pfCategory"></select></div>
+      <div class="field"><label>Origin</label><input required id="pfOrigin" type="text" placeholder="e.g. Kishangarh, Rajasthan"></div>
+      <div class="field"><label>Price per sq.ft (₹)</label><input required id="pfPrice" type="number" min="1"></div>
+      <div class="field"><label>Thickness</label><input required id="pfThickness" type="text" placeholder="e.g. 18mm / 20mm"></div>
+      <div class="field"><label>Finish</label><input required id="pfFinish" type="text" placeholder="e.g. Polished"></div>
+      <button class="btn btn-brass" style="width:100%;" type="submit">Save product</button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="logo" style="color:var(--ivory); margin-bottom:12px;">Kathan Expo</div>
+      <p style="max-width:260px; line-height:1.6;">Marble, granite and sandstone sourced directly from Rajasthan's quarries.</p>
+    </div>
+    <div class="cols">
+      <div>
+        <h5>Explore</h5>
+        <a href="catalog.html">Catalog</a>
+        <a href="wishlist.html">Wishlist</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <a href="about.html">About us</a>
+        <a href="admin.html">Admin</a>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bottom">Demo build — Kathan Expo is a working sample, not yet a hosted product.</div>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const u = document.getElementById('adminUser').value;
+    const p = document.getElementById('adminPass').value;
+    if(u==='admin' && p==='marble123'){
+      setAdminLoggedIn(true);
+      showAdmin();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  });
+  function adminLogout(){
+    setAdminLoggedIn(false);
+    document.getElementById('adminUser').value = '';
+    document.getElementById('adminPass').value = '';
+    showAdmin();
+  }
+  function showAdmin(){
+    const loggedIn = isAdminLoggedIn();
+    document.getElementById('adminLogin').classList.toggle('hidden', loggedIn);
+    document.getElementById('adminPanel').classList.toggle('hidden', !loggedIn);
+    if(loggedIn) renderAdmin();
+  }
+
+  document.querySelectorAll('.tabbar button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tabbar button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      ['products','inquiries','messages'].forEach(t=>{
+        document.getElementById('tab-'+t).classList.toggle('hidden', t!==btn.dataset.tab);
+      });
+    });
+  });
+
+  function renderAdmin(){
+    const products = getProducts();
+    const inquiries = getInquiries();
+    const messages = getMessages();
+    document.getElementById('statProducts').textContent = products.length;
+    document.getElementById('statInquiries').textContent = inquiries.length;
+    document.getElementById('statMessages').textContent = messages.length;
+    document.getElementById('statWishlist').textContent = getWishlist().size;
+
+    document.getElementById('adminProductRows').innerHTML = products.map(p=>{
+      const cat = categoryOf(p.cat);
+      return `<tr>
+        <td><div class="swatch-sm">${marbleSVG(p.id*13+7, cat.color[0], cat.color[1])}</div></td>
+        <td>${p.name}</td>
+        <td>${cat.name}</td>
+        <td>${p.origin}</td>
+        <td>₹${p.price}</td>
+        <td class="row-actions">
+          <button onclick="openProductForm(${p.id})">Edit</button>
+          <button onclick="deleteProduct(${p.id})">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('adminInquiryRows').innerHTML = inquiries.length
+      ? inquiries.map(q=>`<tr><td>${q.product}</td><td>${q.name}</td><td>${q.phone}</td><td>${q.qty}</td><td>${q.message}</td></tr>`).join('')
+      : `<tr><td colspan="5" class="empty">No quote requests yet.</td></tr>`;
+
+    document.getElementById('adminMessageRows').innerHTML = messages.length
+      ? messages.map(m=>`<tr><td>${m.name}</td><td>${m.phone}</td><td>${m.email}</td><td>${m.message}</td></tr>`).join('')
+      : `<tr><td colspan="4" class="empty">No contact messages yet.</td></tr>`;
+  }
+
+  function deleteProduct(id){
+    setProducts(getProducts().filter(p=>p.id!==id));
+    renderAdmin();
+  }
+  function openProductForm(id){
+    const catSelect = document.getElementById('pfCategory');
+    catSelect.innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    if(id){
+      const p = getProducts().find(x=>x.id===id);
+      document.getElementById('pfTitle').textContent = 'Edit product';
+      document.getElementById('pfId').value = p.id;
+      document.getElementById('pfName').value = p.name;
+      catSelect.value = p.cat;
+      document.getElementById('pfOrigin').value = p.origin;
+      document.getElementById('pfPrice').value = p.price;
+      document.getElementById('pfThickness').value = p.thickness;
+      document.getElementById('pfFinish').value = p.finish;
+    } else {
+      document.getElementById('pfTitle').textContent = 'Add product';
+      document.getElementById('pfId').value = '';
+      ['pfName','pfOrigin','pfPrice','pfThickness','pfFinish'].forEach(fid=>document.getElementById(fid).value='');
+    }
+    document.getElementById('productFormOverlay').classList.remove('hidden');
+  }
+  function closeProductForm(){
+    document.getElementById('productFormOverlay').classList.add('hidden');
+  }
+  document.getElementById('productForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const id = document.getElementById('pfId').value;
+    const data = {
+      name: document.getElementById('pfName').value,
+      cat: document.getElementById('pfCategory').value,
+      origin: document.getElementById('pfOrigin').value,
+      price: Number(document.getElementById('pfPrice').value),
+      thickness: document.getElementById('pfThickness').value,
+      finish: document.getElementById('pfFinish').value,
+      desc: 'Added via the Kathan Expo admin panel.'
+    };
+    const products = getProducts();
+    if(id){
+      const p = products.find(x=>x.id===Number(id));
+      Object.assign(p, data);
+    } else {
+      const nid = getNextProductId();
+      products.push({id: nid, ...data});
+      setNextProductId(nid+1);
+    }
+    setProducts(products);
+    closeProductForm();
+    renderAdmin();
+  });
+
+  showAdmin();
+</script>
+</body>
+</html>

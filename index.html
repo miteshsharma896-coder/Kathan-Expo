@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kathan Expo — Stone from the Source</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="logo" href="index.html">
+      <svg class="mark" viewBox="0 0 24 24"><path d="M3 20 L3 10 L12 4 L21 10 L21 20 Z" fill="none" stroke="#B08D57" stroke-width="1.4"/><path d="M3 10 L12 16 L21 10" fill="none" stroke="#B08D57" stroke-width="1.4"/></svg>
+      Kathan Expo
+    </a>
+    <nav class="navlinks">
+      <a href="index.html" class="active">Home</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="about.html">About</a>
+      <a href="wishlist.html">Wishlist<span class="badge" id="wishCount">0</span></a>
+      <a href="contact.html">Contact</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">● Direct from Rajasthan's marble belt</span>
+      <h1>Stone from the source, not the middleman.</h1>
+      <p class="lead">Kathan Expo sources slabs and tiles straight from the quarries and processing units of Makrana and Kishangarh — priced by the square foot, no showroom markup.</p>
+      <div class="search-bar">
+        <input id="heroSearch" type="text" placeholder="Search “Makrana white”, “green onyx”, “granite”…" onkeydown="if(event.key==='Enter'){event.preventDefault(); goSearch();}">
+        <button onclick="goSearch()">Search</button>
+      </div>
+      <div class="hero-quarries">
+        <div class="quarry-tag"><b>Makrana</b> · white marble, since antiquity</div>
+        <div class="quarry-tag"><b>Kishangarh</b> · Asia's largest marble market</div>
+        <div class="quarry-tag"><b>Rajnagar</b> · marble &amp; sandstone belt</div>
+      </div>
+    </div>
+    <svg class="vein" viewBox="0 0 1180 28" preserveAspectRatio="none" style="position:absolute; bottom:0; left:0;">
+      <path d="M0,14 C150,4 300,24 450,12 S750,2 900,16 S1100,22 1180,10" stroke="#B08D57" opacity="0.4"/>
+    </svg>
+  </section>
+
+  <section class="band light" style="padding-bottom:40px;">
+    <div class="band-inner" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:24px; border-bottom:1px solid var(--line); padding-bottom:40px;">
+      <div><div class="display" style="font-size:28px;">17</div><div class="mono" style="font-size:11px; color:var(--stone-grey); text-transform:uppercase; margin-top:4px;">Stone varieties listed</div></div>
+      <div><div class="display" style="font-size:28px;">6</div><div class="mono" style="font-size:11px; color:var(--stone-grey); text-transform:uppercase; margin-top:4px;">Quarry regions covered</div></div>
+      <div><div class="display" style="font-size:28px;">₹88–520</div><div class="mono" style="font-size:11px; color:var(--stone-grey); text-transform:uppercase; margin-top:4px;">Price range per sq.ft</div></div>
+      <div><div class="display" style="font-size:28px;">24 hrs</div><div class="mono" style="font-size:11px; color:var(--stone-grey); text-transform:uppercase; margin-top:4px;">Typical quote turnaround</div></div>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="band-inner">
+      <div class="section-head">
+        <div>
+          <h2>Browse by stone</h2>
+          <p>Six categories, sourced across Rajasthan's quarry belt and beyond.</p>
+        </div>
+        <a class="btn btn-outline" href="catalog.html">View full catalog →</a>
+      </div>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+  </section>
+
+  <section class="band dark">
+    <div class="band-inner">
+      <div class="section-head">
+        <div>
+          <h2 style="color:var(--ivory)">Featured slabs</h2>
+          <p>A few pieces currently moving fast.</p>
+        </div>
+      </div>
+      <div class="prod-grid" id="featuredGrid"></div>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="band-inner" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:32px;">
+      <div>
+        <div class="mono" style="color:var(--brass); font-size:12px; letter-spacing:0.08em; margin-bottom:10px;">01 — REQUEST</div>
+        <h3 style="font-size:19px; margin-bottom:8px;">Send us your requirement</h3>
+        <p style="color:var(--stone-grey); font-size:14px; line-height:1.6;">Tell us the stone, quantity in sq. ft., and finish you need.</p>
+      </div>
+      <div>
+        <div class="mono" style="color:var(--brass); font-size:12px; letter-spacing:0.08em; margin-bottom:10px;">02 — QUOTE</div>
+        <h3 style="font-size:19px; margin-bottom:8px;">We price it directly</h3>
+        <p style="color:var(--stone-grey); font-size:14px; line-height:1.6;">Straight from our processing unit — no showroom margin added.</p>
+      </div>
+      <div>
+        <div class="mono" style="color:var(--brass); font-size:12px; letter-spacing:0.08em; margin-bottom:10px;">03 — DISPATCH</div>
+        <h3 style="font-size:19px; margin-bottom:8px;">Slabs reach your site</h3>
+        <p style="color:var(--stone-grey); font-size:14px; line-height:1.6;">Crated and dispatched from Kishangarh to your location.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="logo" style="color:var(--ivory); margin-bottom:12px;">Kathan Expo</div>
+      <p style="max-width:260px; line-height:1.6;">Marble, granite and sandstone sourced directly from Rajasthan's quarries.</p>
+    </div>
+    <div class="cols">
+      <div>
+        <h5>Explore</h5>
+        <a href="catalog.html">Catalog</a>
+        <a href="wishlist.html">Wishlist</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <a href="about.html">About us</a>
+        <a href="admin.html">Admin</a>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bottom">Demo build — Kathan Expo is a working sample, not yet a hosted product.</div>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+  function renderCategoryGrid(){
+    const products = getProducts();
+    document.getElementById('catGrid').innerHTML = CATEGORIES.map(c=>{
+      const count = products.filter(p=>p.cat===c.id).length;
+      return `<a class="cat-card" href="catalog.html?cat=${c.id}">
+        <div class="cat-swatch">${marbleSVG(c.id.length*17+3, c.color[0], c.color[1])}</div>
+        <div class="name">${c.name}</div>
+        <div class="count">${count} product${count===1?'':'s'}</div>
+      </a>`;
+    }).join('');
+  }
+  function renderFeatured(){
+    const products = getProducts();
+    document.getElementById('featuredGrid').innerHTML = products.slice(0,4).map(p=>productCard(p)).join('');
+  }
+  function onWishlistChanged(){ renderFeatured(); }
+  renderCategoryGrid();
+  renderFeatured();
+</script>
+</body>
+</html>

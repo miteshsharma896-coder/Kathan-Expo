@@ -9,9 +9,12 @@ export default function Header() {
     <header>
       <div className="nav-inner">
         <Link className="logo" to="/">
-          <svg className="mark" viewBox="0 0 24 24">
-            <path d="M3 20 L3 10 L12 4 L21 10 L21 20 Z" fill="none" stroke="#3B6EA5" strokeWidth="1.4" />
-            <path d="M3 10 L12 16 L21 10" fill="none" stroke="#3B6EA5" strokeWidth="1.4" />
+          <svg className="logo-mark" viewBox="0 0 32 32" fill="none">
+            <polygon points="16,2 30,10 30,22 16,30 2,22 2,10" fill="none" stroke="#C9A84C" strokeWidth="1.4"/>
+            <polygon points="16,2 30,10 16,14 2,10" fill="rgba(201,168,76,0.15)" stroke="#C9A84C" strokeWidth="1"/>
+            <line x1="2" y1="10" x2="16" y2="14" stroke="#C9A84C" strokeWidth="0.8" opacity="0.6"/>
+            <line x1="30" y1="10" x2="16" y2="14" stroke="#C9A84C" strokeWidth="0.8" opacity="0.6"/>
+            <line x1="16" y1="14" x2="16" y2="30" stroke="#C9A84C" strokeWidth="0.8" opacity="0.6"/>
           </svg>
           Yatharth Emerald Stones
         </Link>

@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react';
 import { api, assetUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { marbleSVG } from '../utils/marble';
+import SEO from '../components/SEO';
 
-const emptyForm = { name: '', category: '', origin: '', price: '', thickness: '', finish: '', images: [] };
+const emptyForm = { name: '', category: '', origin: '', thickness: '', finish: '', images: [] };
 const emptyCatForm = { slug: '', name: '', colorBase: '#DCC9A6', colorVein: '#9C7B4B' };
 const MAX_IMAGES = 4;
 
 export default function Admin() {
   const { isLoggedIn, login, logout } = useAuth();
-  if (!isLoggedIn) return <LoginForm login={login} />;
-  return <Panel logout={logout} />;
+  return (
+    <>
+      <SEO title="Admin" path="/admin" noindex />
+      {!isLoggedIn ? <LoginForm login={login} /> : <Panel logout={logout} />}
+    </>
+  );
 }
 
 function LoginForm({ login }) {
@@ -118,7 +123,6 @@ function Panel({ logout }) {
       name: p.name,
       category: p.category,
       origin: p.origin,
-      price: p.price,
       thickness: p.thickness,
       finish: p.finish,
       images: p.images || [],
@@ -133,7 +137,7 @@ function Panel({ logout }) {
   }
   async function handleSave(e) {
     e.preventDefault();
-    const payload = { ...form, price: Number(form.price), description: 'Added via the Yatharth Emerald Stones admin panel.' };
+    const payload = { ...form, description: 'Added via the Yatharth Emerald Stones admin panel.' };
     if (editingId) await api.updateProduct(editingId, payload);
     else await api.createProduct(payload);
     setFormOpen(false);
@@ -198,7 +202,7 @@ function Panel({ logout }) {
               </div>
               <table>
                 <thead>
-                  <tr><th></th><th>Name</th><th>Category</th><th>Origin</th><th>Price/sq.ft</th><th></th></tr>
+                  <tr><th></th><th>Name</th><th>Category</th><th>Origin</th><th></th></tr>
                 </thead>
                 <tbody>
                   {products.map((p) => {
@@ -216,7 +220,6 @@ function Panel({ logout }) {
                         <td>{p.name}</td>
                         <td>{cat?.name}</td>
                         <td>{p.origin}</td>
-                        <td>₹{p.price}</td>
                         <td className="row-actions">
                           <button onClick={() => openEdit(p)}>Edit</button>
                           <button onClick={() => handleDelete(p._id)}>Delete</button>
@@ -309,10 +312,6 @@ function Panel({ logout }) {
                 <input required placeholder="e.g. Kishangarh, Rajasthan" value={form.origin} onChange={(e) => setForm({ ...form, origin: e.target.value })} />
               </div>
               <div className="field">
-                <label>Price per sq.ft (₹)<span className="required-mark">*</span></label>
-                <input required type="number" min="1" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-              </div>
-              <div className="field">
                 <label>Thickness<span className="required-mark">*</span></label>
                 <input required placeholder="e.g. 18mm / 20mm" value={form.thickness} onChange={(e) => setForm({ ...form, thickness: e.target.value })} />
               </div>
@@ -330,7 +329,7 @@ function Panel({ logout }) {
                         <img
                           src={assetUrl(img)}
                           alt=""
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 3, border: '1px solid var(--line)' }}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 3, border: '1px solid var(--line-soft)' }}
                         />
                         <button
                           type="button"
@@ -461,7 +460,7 @@ function EnquiryTrendChart({ series }) {
           key={f}
           x1={padding} x2={width - padding}
           y1={height - f * (height - 10)} y2={height - f * (height - 10)}
-          stroke="var(--line)" strokeWidth="1"
+          stroke="var(--line-soft)" strokeWidth="1"
         />
       ))}
       {series.map((d, i) => {
@@ -471,7 +470,7 @@ function EnquiryTrendChart({ series }) {
         const showLabel = series.length <= 14 || i % 2 === 0;
         return (
           <g key={d.key}>
-            <rect x={cx - barW - 1.5} y={height - qh} width={barW} height={qh} fill="var(--brass)" rx="1.5" />
+            <rect x={cx - barW - 1.5} y={height - qh} width={barW} height={qh} fill="var(--gold)" rx="1.5" />
             <rect x={cx + 1.5} y={height - mh} width={barW} height={mh} fill="var(--stone-grey)" opacity="0.55" rx="1.5" />
             {showLabel && (
               <text x={cx} y={height + 16} textAnchor="middle" fontSize="9" fill="var(--stone-grey)" fontFamily="'IBM Plex Mono',monospace">
@@ -523,13 +522,13 @@ function Dashboard({ quotes, messages, products, categories }) {
           <p className="empty">No enquiries yet — this fills in once customers start submitting quote requests or contact messages.</p>
         ) : (
           <>
-            <div style={{ display: 'flex', height: 28, borderRadius: 4, overflow: 'hidden', border: '1px solid var(--line)' }}>
-              <div style={{ width: `${quotePct}%`, background: 'linear-gradient(160deg,var(--brass-light),var(--brass))' }} />
+            <div style={{ display: 'flex', height: 28, borderRadius: 4, overflow: 'hidden', border: '1px solid var(--line-soft)' }}>
+              <div style={{ width: `${quotePct}%`, background: 'linear-gradient(160deg,var(--gold-light),var(--gold))' }} />
               <div style={{ width: `${messagePct}%`, background: 'var(--ivory-dim)' }} />
             </div>
             <div style={{ display: 'flex', gap: 24, marginTop: 10, fontSize: 13 }}>
-              <span><i style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--brass)', marginRight: 6 }} />Quote requests — {quotes.length} ({quotePct}%)</span>
-              <span><i style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--ivory-dim)', border: '1px solid var(--line)', marginRight: 6 }} />Contact messages — {messages.length} ({messagePct}%)</span>
+              <span><i style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--gold)', marginRight: 6 }} />Quote requests — {quotes.length} ({quotePct}%)</span>
+              <span><i style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--ivory-dim)', border: '1px solid var(--line-soft)', marginRight: 6 }} />Contact messages — {messages.length} ({messagePct}%)</span>
             </div>
           </>
         )}
@@ -542,7 +541,7 @@ function Dashboard({ quotes, messages, products, categories }) {
         </p>
         <EnquiryTrendChart series={dailySeries} />
         <div style={{ display: 'flex', gap: 24, marginTop: 8, fontSize: 12.5 }}>
-          <span><i style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--brass)', marginRight: 6 }} />Quote requests</span>
+          <span><i style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--gold)', marginRight: 6 }} />Quote requests</span>
           <span><i style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--stone-grey)', opacity: 0.55, marginRight: 6 }} />Contact messages</span>
         </div>
       </div>
@@ -558,7 +557,7 @@ function Dashboard({ quotes, messages, products, categories }) {
                 <span className="mono" style={{ color: 'var(--stone-grey)' }}>{count}</span>
               </div>
               <div style={{ height: 8, background: 'var(--ivory-dim)', borderRadius: 4, overflow: 'hidden' }}>
-                <div style={{ width: `${(count / topProductsMax) * 100}%`, height: '100%', background: 'linear-gradient(160deg,var(--brass-light),var(--brass))' }} />
+                <div style={{ width: `${(count / topProductsMax) * 100}%`, height: '100%', background: 'linear-gradient(160deg,var(--gold-light),var(--gold))' }} />
               </div>
             </div>
           ))}
@@ -567,7 +566,7 @@ function Dashboard({ quotes, messages, products, categories }) {
           <h3 style={{ fontSize: 15, marginBottom: 12 }}>Recent activity</h3>
           {recent.length === 0 && <p className="empty">Nothing yet.</p>}
           {recent.map((r, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 13.5, padding: '9px 0', borderBottom: '1px solid var(--line)' }}>
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 13.5, padding: '9px 0', borderBottom: '1px solid var(--line-soft)' }}>
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</span>
               <span className="mono" style={{ color: 'var(--stone-grey)', flexShrink: 0, fontSize: 11 }}>{r.type}</span>
             </div>

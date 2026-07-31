@@ -1,11 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../api';
 import PhoneField from './PhoneField';
 
+const emptyForm = { name: '', phone: '', qty: 100, message: '' };
+
 export default function QuoteModal({ product, onClose }) {
   const [sent, setSent] = useState(false);
-  const [form, setForm] = useState({ name: '', phone: '', qty: 100, message: '' });
+  const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [instanceKey, setInstanceKey] = useState(0);
+
+  // Every time the modal is opened for a product (including the same
+  // product a second time), reset back to a fresh form instead of
+  // showing the previous "request sent" confirmation. Bumping
+  // instanceKey also forces PhoneField to remount so its internal
+  // country/number state clears too.
+  useEffect(() => {
+    if (product) {
+      setSent(false);
+      setForm(emptyForm);
+      setError('');
+      setInstanceKey((k) => k + 1);
+    }
+  }, [product]);
 
   if (!product) return null;
 
@@ -35,7 +52,7 @@ export default function QuoteModal({ product, onClose }) {
               </div>
               <div className="field">
                 <label>Phone<span className="required-mark">*</span></label>
-                <PhoneField value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
+                <PhoneField key={instanceKey} value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
               </div>
               <div className="field">
                 <label>Quantity (sq. ft)<span className="required-mark">*</span></label>

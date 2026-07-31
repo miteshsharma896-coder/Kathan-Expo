@@ -4,6 +4,7 @@ import { api } from '../api';
 import { useWishlist } from '../context/WishlistContext';
 import ProductCard from '../components/ProductCard';
 import QuoteModal from '../components/QuoteModal';
+import SEO from '../components/SEO';
 
 export default function Wishlist() {
   const { wishlist } = useWishlist();
@@ -23,6 +24,7 @@ export default function Wishlist() {
 
   return (
     <>
+      <SEO title="Your Wishlist" path="/wishlist" noindex />
       <section className="band light">
         <div className="band-inner">
           <div className="section-head">
@@ -34,7 +36,7 @@ export default function Wishlist() {
           <div className="prod-grid">
             {!loading && products.length === 0 && (
               <div className="empty">
-                Nothing saved yet. Browse the <Link to="/catalog" style={{ color: 'var(--brass)' }}>catalog</Link> and tap the heart on any product to keep it here.
+                Nothing saved yet. Browse the <Link to="/catalog" style={{ color: 'var(--gold)' }}>catalog</Link> and tap the heart on any product to keep it here.
               </div>
             )}
             {products.map((p) => (

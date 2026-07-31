@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # MarbleHub — MERN version
 
 A real full-stack site now: **M**ongoDB (database) + **E**xpress (API server) +
@@ -146,6 +145,44 @@ If you move the project to a new computer or redeploy it later, remember to
 copy the `backend/uploads/` folder along with your database, or those photos
 will show as broken links.
 
+## SEO
+
+The site now has real SEO built in:
+
+- **Per-page titles & meta descriptions** — every page (Home, Catalog, each
+  Product, About, Contact) sets its own `<title>` and description, instead
+  of the same generic tag everywhere.
+- **Product pages** carry structured data (`schema.org/Product`) so Google
+  can potentially show rich results, plus Open Graph / Twitter Card tags so
+  links look right when shared on WhatsApp, Facebook, etc.
+- **Admin and Wishlist pages are marked `noindex`** — they'll never show up
+  in search results.
+- **`robots.txt`** at the site root tells search engines what they can crawl.
+- **`sitemap.xml`** lists every page. It ships as a placeholder — run this
+  once you have a real domain (and again any time you add products):
+  ```
+  cd backend
+  npm run sitemap
+  ```
+  It reads `SITE_URL` from `backend/.env` and writes a fresh sitemap
+  covering every product straight from MongoDB.
+
+**Two things to do once you have a real domain:**
+1. Set `SITE_URL` in `backend/.env` and `VITE_SITE_URL` in `frontend/.env`
+   to your real domain (e.g. `https://www.yatharthemeraldstones.com`), then
+   run `npm run sitemap` again.
+2. Submit `https://yourdomain.com/sitemap.xml` to
+   [Google Search Console](https://search.google.com/search-console) —
+   this is what actually gets your pages indexed and searchable.
+
+**One honest limitation:** this is a client-side React app, not a
+server-rendered site. Google's crawler runs JavaScript and generally
+indexes it fine, but some other crawlers (and link-preview bots that don't
+run JS) may only see the generic homepage tags rather than per-page ones.
+If that becomes a problem later, the fix is moving to a server-rendered
+framework (like Next.js) — worth knowing about, not something to worry
+about right now.
+
 ## Where things live now
 
 - Add/edit real products → use the **Admin panel** in the browser (writes to
@@ -155,6 +192,3 @@ will show as broken links.
   real data you care about)
 - Design/colors → `frontend/src/styles.css`
 - Admin password → `backend/.env`
-=======
-# Kathan-Expo
->>>>>>> f72632f272a258ed0e0f472658379049fe8ce500

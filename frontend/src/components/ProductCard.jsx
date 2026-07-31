@@ -29,7 +29,13 @@ export default function ProductCard({ product, categories, onQuote }) {
     >
       <div className="thumb">
         {hasPhoto ? (
-          <img src={assetUrl(product.images[0])} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img
+            src={assetUrl(product.images[0])}
+            alt={`${product.name} - ${product.origin}`}
+            loading="lazy"
+            decoding="async"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         ) : (
           <div dangerouslySetInnerHTML={{ __html: productThumb(product, categories) }} />
         )}

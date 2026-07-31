@@ -6,7 +6,9 @@
   "type": "commonjs",
   "scripts": {
     "dev": "node server.js",
-    "seed": "node seed/seed.js"
+    "seed": "node seed/seed.js",
+    "sitemap": "node scripts/generateSitemap.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -4,11 +4,16 @@ export default function Footer() {
   return (
     <footer>
       <div className="footer-inner">
-        <div>
-          <div className="logo" style={{ color: 'var(--ivory)', marginBottom: 12 }}>Yatharth Emerald Stones</div>
-          <p style={{ maxWidth: 260, lineHeight: 1.6 }}>
-            Marble, granite and sandstone sourced directly from Rajasthan's quarries.
-          </p>
+        <div className="footer-brand">
+          <div className="logo" style={{ color: 'var(--ivory)', marginBottom: 14 }}>
+            <svg viewBox="0 0 32 32" fill="none" style={{ width: 28, height: 28 }}>
+              <polygon points="16,2 30,10 30,22 16,30 2,22 2,10" fill="none" stroke="#C9A84C" strokeWidth="1.4"/>
+              <polygon points="16,2 30,10 16,14 2,10" fill="rgba(201,168,76,0.15)" stroke="#C9A84C" strokeWidth="1"/>
+              <line x1="16" y1="14" x2="16" y2="30" stroke="#C9A84C" strokeWidth="0.8" opacity="0.6"/>
+            </svg>
+            Yatharth Emerald Stones
+          </div>
+          <p>Marble, granite, onyx and sandstone sourced directly from the quarries and godowns of Rajsamand, Rajasthan.</p>
         </div>
         <div className="cols">
           <div>
@@ -23,7 +28,10 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <div className="foot-bottom">Yatharth Emerald Stones — powered by a live MongoDB + Express API.</div>
+      <div className="foot-bottom">
+        <span>© {new Date().getFullYear()} Yatharth Emerald Stones. All rights reserved.</span>
+        <span>Rajsamand, Rajasthan, India</span>
+      </div>
     </footer>
   );
 }

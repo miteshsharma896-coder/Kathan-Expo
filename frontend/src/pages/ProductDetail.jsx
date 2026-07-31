@@ -4,6 +4,7 @@ import { api, assetUrl } from '../api';
 import { marbleSVG, seedFromId } from '../utils/marble';
 import { useWishlist } from '../context/WishlistContext';
 import QuoteModal from '../components/QuoteModal';
+import SEO from '../components/SEO';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -28,10 +29,13 @@ export default function ProductDetail() {
 
   if (notFound) {
     return (
-      <div className="empty" style={{ padding: 80 }}>
-        This product couldn't be found — it may have been removed.{' '}
-        <Link to="/catalog" style={{ color: 'var(--brass)' }}>Back to catalog →</Link>
-      </div>
+      <>
+        <SEO title="Product Not Found" noindex />
+        <div className="empty" style={{ padding: 80 }}>
+          This product couldn't be found — it may have been removed.{' '}
+          <Link to="/catalog" style={{ color: 'var(--gold)' }}>Back to catalog →</Link>
+        </div>
+      </>
     );
   }
   if (!product) return null;
@@ -50,8 +54,29 @@ export default function ProductDetail() {
       : [];
   }
 
+  const metaDescription = `${product.name} from ${product.origin}. ${product.thickness} thickness, ${product.finish} finish. ${product.description}`.slice(0, 160);
+
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    category: cat?.name,
+    ...(hasPhotos && { image: product.images.map((img) => assetUrl(img)) }),
+    brand: { '@type': 'Brand', name: 'Yatharth Emerald Stones' },
+    // No "offers" block - pricing is quote-based, not listed publicly,
+    // and schema.org's Offer type requires an actual price to be valid.
+  };
+
   return (
     <>
+      <SEO
+        title={product.name}
+        description={metaDescription}
+        path={`/product/${product._id}`}
+        image={hasPhotos ? assetUrl(product.images[0]) : undefined}
+        jsonLd={productJsonLd}
+      />
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 28px 0' }}>
         <Link className="btn btn-outline" style={{ padding: '8px 16px', fontSize: 13 }} to="/catalog">← Back to catalog</Link>
       </div>
@@ -59,7 +84,14 @@ export default function ProductDetail() {
         <div>
           <div className="pd-gallery-main">
             {gallery[activeShot]?.type === 'photo' ? (
-              <img src={gallery[activeShot].value} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img
+                src={gallery[activeShot].value}
+                alt={`${product.name} - ${product.origin}, ${product.finish} finish`}
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             ) : (
               <div dangerouslySetInnerHTML={{ __html: gallery[activeShot]?.value || '' }} />
             )}
@@ -68,7 +100,13 @@ export default function ProductDetail() {
             {gallery.map((shot, i) => (
               <div key={i} className={`t ${i === activeShot ? 'active' : ''}`} onClick={() => setActiveShot(i)}>
                 {shot.type === 'photo' ? (
-                  <img src={shot.value} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img
+                    src={shot.value}
+                    alt={`${product.name} view ${i + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
                 ) : (
                   <div dangerouslySetInnerHTML={{ __html: shot.value }} />
                 )}
@@ -79,7 +117,7 @@ export default function ProductDetail() {
         <div className="pd-info">
           <div className="origin">{product.origin}</div>
           <h1>{product.name}</h1>
-          <div className="mono" style={{ fontSize: 13, color: 'var(--brass)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 20 }}>
+          <div className="mono" style={{ fontSize: 13, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 20 }}>
             Price on request — send a quote request below
           </div>
           <p className="desc">{product.description}</p>

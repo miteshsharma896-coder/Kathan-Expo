@@ -3,13 +3,12 @@ const Product = require('../models/Product');
 const requireAdmin = require('../middleware/auth');
 const router = express.Router();
 
-// GET /api/products?category=white&maxPrice=300&search=makrana
+// GET /api/products?category=white&search=makrana
 router.get('/', async (req, res) => {
-  const { category, maxPrice, search } = req.query;
+  const { category, search } = req.query;
   const filter = {};
 
   if (category) filter.category = category;
-  if (maxPrice) filter.price = { $lte: Number(maxPrice) };
   if (search) {
     filter.$or = [
       { name: { $regex: search, $options: 'i' } },

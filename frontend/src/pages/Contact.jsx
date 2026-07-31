@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import PhoneField from '../components/PhoneField';
+import SEO from '../components/SEO';
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
@@ -20,11 +21,17 @@ export default function Contact() {
   }
 
   return (
-    <section className="band light">
+    <>
+      <SEO
+        title="Contact Us"
+        description="Get in touch with Yatharth Emerald Stones for bulk marble, granite or sandstone orders, site visits, or general questions."
+        path="/contact"
+      />
+      <section className="band light">
       <div className="band-inner" style={{ maxWidth: 560 }}>
         {!sent ? (
           <>
-            <h2 style={{ marginBottom: 8 }}>Get in touch</h2>
+            <h1 style={{ marginBottom: 8, fontSize: 30, fontFamily: "'Fraunces',serif", fontWeight: 600 }}>Get in touch</h1>
             <p style={{ color: 'var(--stone-grey)', fontSize: 14, marginBottom: 32 }}>
               Questions about a bulk order or site visit? Send us a note.
             </p>
@@ -62,6 +69,7 @@ export default function Contact() {
           </div>
         )}
       </div>
-    </section>
+      </section>
+    </>
   );
 }

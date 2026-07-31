@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import ProductCard from '../components/ProductCard';
 import QuoteModal from '../components/QuoteModal';
+import SEO from '../components/SEO';
 
 export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -44,16 +45,21 @@ export default function Catalog() {
 
   return (
     <>
+      <SEO
+        title="Full Catalog"
+        description="Browse our full catalog of marble, granite, onyx and sandstone slabs - Makrana white, Kishangarh beige, Rajnagar black marble, green onyx and more, sourced directly from Rajasthan."
+        path="/catalog"
+      />
       <section className="band light" style={{ paddingBottom: 20 }}>
         <div className="band-inner">
           <div className="section-head">
             <div>
-              <h2>Full catalog</h2>
+              <h1 style={{ fontSize: 30, fontFamily: "'Fraunces',serif", fontWeight: 600 }}>Full catalog</h1>
               <p>{loading ? 'Loading…' : `Showing ${products.length} products`}</p>
             </div>
             <input
               placeholder="Search stone…"
-              style={{ padding: '10px 14px', border: '1px solid var(--line)', borderRadius: 2, fontSize: 14, width: 220 }}
+              style={{ padding: '10px 14px', border: '1px solid var(--line-soft)', borderRadius: 2, fontSize: 14, width: 220 }}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

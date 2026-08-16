@@ -2,9 +2,23 @@
 // Each call produces a unique slab appearance — realistic veining,
 // depth, and mineral inclusions — using only SVG filters.
 
+// Sanitise a colour value before embedding in SVG markup.
+// Only allows safe CSS colour formats — hex, rgb(), named keywords.
+function safeColor(value, fallback) {
+  if (!value || typeof value !== 'string') return fallback;
+  const v = value.trim();
+  // Allow: #RGB, #RRGGBB, #RRGGBBAA, rgb(...), rgba(...), named colours (letters only)
+  if (/^#[0-9A-Fa-f]{3,8}$/.test(v)) return v;
+  if (/^rgba?\(\s*\d+[\s,]+\d+[\s,]+\d+/.test(v)) return v;
+  if (/^[a-zA-Z]+$/.test(v)) return v; // CSS named colour like "white"
+  return fallback; // anything else → use the fallback
+}
+
 export function marbleSVG(seed, base, vein, accent) {
   const s = seed || 1;
-  const acc = accent || vein;
+  const safeBase = safeColor(base, '#888880');
+  const safeVein = safeColor(vein, '#AAAAAA');
+  const safeAcc  = safeColor(accent || vein, safeVein);
   const bf1 = (0.006 + (s % 7) * 0.002).toFixed(4);
   const bf2 = (0.028 + (s % 11) * 0.008).toFixed(4);
   const bfFine = (0.045 + (s % 5) * 0.012).toFixed(4);
@@ -28,9 +42,9 @@ export function marbleSVG(seed, base, vein, accent) {
       </filter>
       <!-- Diagonal directional grain -->
       <linearGradient id="mg${s}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate(${angle},200,130)">
-        <stop offset="0%" stop-color="${base}" stop-opacity="1"/>
-        <stop offset="40%" stop-color="${base}" stop-opacity="0.9"/>
-        <stop offset="100%" stop-color="${acc}" stop-opacity="0.25"/>
+        <stop offset="0%" stop-color="${safeBase}" stop-opacity="1"/>
+        <stop offset="40%" stop-color="${safeBase}" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="${safeAcc}" stop-opacity="0.25"/>
       </linearGradient>
       <!-- Gloss sheen -->
       <linearGradient id="gs${s}" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -40,13 +54,13 @@ export function marbleSVG(seed, base, vein, accent) {
       </linearGradient>
     </defs>
     <!-- Base stone color -->
-    <rect width="400" height="260" fill="${base}"/>
+    <rect width="400" height="260" fill="${safeBase}"/>
     <!-- Directional tonal variation -->
     <rect width="400" height="260" fill="url(#mg${s})" opacity="0.45"/>
     <!-- Main vein layer -->
-    <rect width="400" height="260" filter="url(#mv${s})" fill="${vein}" opacity="${veinOpacity}"/>
+    <rect width="400" height="260" filter="url(#mv${s})" fill="${safeVein}" opacity="${veinOpacity}"/>
     <!-- Fine grain overlay -->
-    <rect width="400" height="260" filter="url(#mf${s})" fill="${acc}" opacity="${fineOpacity}"/>
+    <rect width="400" height="260" filter="url(#mf${s})" fill="${safeAcc}" opacity="${fineOpacity}"/>
     <!-- Polished surface sheen -->
     <rect width="400" height="260" fill="url(#gs${s})"/>
   </svg>`;

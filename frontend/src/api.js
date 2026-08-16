@@ -49,13 +49,16 @@ export const api = {
   submitMessage: (data) => request('/messages', { method: 'POST', body: JSON.stringify(data) }),
   getMessages: () => request('/messages', { headers: authHeader() }),
 
+  getSettings: () => request('/settings', { headers: authHeader() }),
+  updateSettings: (data) => request('/settings', { method: 'PUT', headers: authHeader(), body: JSON.stringify(data) }),
+
   // Uploads a single image file (multipart) and returns { url }
   uploadImage: async (file) => {
     const formData = new FormData();
     formData.append('image', file);
     const res = await fetch(`${API_URL}/upload`, {
       method: 'POST',
-      headers: authHeader(), // no Content-Type here - browser sets the multipart boundary itself
+      headers: authHeader(),
       body: formData,
     });
     if (!res.ok) {
@@ -64,6 +67,26 @@ export const api = {
     }
     return res.json();
   },
+
+  // Uploads multiple image files in one request and returns { urls: [...] }
+  uploadImages: async (files) => {
+    const formData = new FormData();
+    for (const file of files) formData.append('images', file);
+    const res = await fetch(`${API_URL}/upload/batch`, {
+      method: 'POST',
+      headers: authHeader(),
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Upload failed (${res.status})`);
+    }
+    return res.json(); // { urls: [...] }
+  },
+
+  // Deletes an uploaded image from disk by filename
+  deleteImage: (filename) =>
+    request(`/upload/${filename}`, { method: 'DELETE', headers: authHeader() }),
 
   login: (username, password) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),

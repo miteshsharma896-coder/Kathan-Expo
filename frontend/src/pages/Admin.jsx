@@ -6,7 +6,8 @@ import SEO from '../components/SEO';
 
 const emptyForm = { name: '', category: '', origin: '', thickness: '', finish: '', images: [] };
 const emptyCatForm = { slug: '', name: '', colorBase: '#DCC9A6', colorVein: '#9C7B4B' };
-const MAX_IMAGES = 4;
+const MAX_IMAGES = 8;
+const MAX_SIZE_MB = 5;
 
 export default function Admin() {
   const { isLoggedIn, login, logout } = useAuth();
@@ -65,11 +66,92 @@ function Panel({ logout }) {
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [uploadProgress, setUploadProgress] = useState('');
 
   const [catFormOpen, setCatFormOpen] = useState(false);
   const [catForm, setCatForm] = useState(emptyCatForm);
   const [catEditingId, setCatEditingId] = useState(null);
   const [catError, setCatError] = useState('');
+
+  const MAX_SIZE_MB = 5;
+  const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
+  // Validate files client-side before even hitting the API
+  function validateFiles(files) {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    for (const file of files) {
+      if (!allowed.includes(file.type)) {
+        return `"${file.name}" is not a supported format. Only JPG, PNG and WEBP are allowed.`;
+      }
+      if (file.size > MAX_SIZE_BYTES) {
+        return `"${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)} MB — image size must not exceed ${MAX_SIZE_MB} MB.`;
+      }
+    }
+    return null;
+  }
+
+  async function handleFileSelect(e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = ''; // allow re-selecting the same file
+    if (!files.length) return;
+
+    const room = MAX_IMAGES - form.images.length;
+    if (room <= 0) {
+      setUploadError(`You can add up to ${MAX_IMAGES} photos per product.`);
+      return;
+    }
+
+    const toUpload = files.slice(0, room);
+
+    // ── Client-side validation (size + type) ──────────────────────────────────
+    const clientError = validateFiles(toUpload);
+    if (clientError) {
+      setUploadError(clientError);
+      return;
+    }
+
+    setUploadError('');
+    setUploading(true);
+
+    try {
+      if (toUpload.length === 1) {
+        // Single file — use the existing single-upload endpoint
+        setUploadProgress('Uploading image…');
+        const { url } = await api.uploadImage(toUpload[0]);
+        setForm((f) => ({ ...f, images: [...f.images, url] }));
+      } else {
+        // Multiple files — use the batch endpoint
+        setUploadProgress(`Uploading ${toUpload.length} images…`);
+        const { urls } = await api.uploadImages(toUpload);
+        setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
+      }
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+      setUploadProgress('');
+    }
+  }
+
+  function removeImage(index) {
+    const img = form.images[index];
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+    // Attempt to delete from disk — non-blocking, ignore errors
+    if (img) {
+      const filename = img.replace(/^\/uploads\//, '');
+      api.deleteImage(filename).catch(() => {});
+    }
+  }
+
+  function moveImage(from, to) {
+    if (to < 0 || to >= form.images.length) return;
+    setForm((f) => {
+      const imgs = [...f.images];
+      const [moved] = imgs.splice(from, 1);
+      imgs.splice(to, 0, moved);
+      return { ...f, images: imgs };
+    });
+  }
 
   function openAddCategory() {
     setCatForm(emptyCatForm);
@@ -116,6 +198,7 @@ function Panel({ logout }) {
     setForm(emptyForm);
     setEditingId(null);
     setUploadError('');
+    setSaveError('');
     setFormOpen(true);
   }
   function openEdit(p) {
@@ -129,19 +212,32 @@ function Panel({ logout }) {
     });
     setEditingId(p._id);
     setUploadError('');
+    setSaveError('');
     setFormOpen(true);
   }
   async function handleDelete(id) {
     await api.deleteProduct(id);
     loadAll();
   }
+  const [saveError, setSaveError] = useState('');
+
   async function handleSave(e) {
     e.preventDefault();
-    const payload = { ...form, description: 'Added via the Yatharth Emerald Stones admin panel.' };
-    if (editingId) await api.updateProduct(editingId, payload);
-    else await api.createProduct(payload);
-    setFormOpen(false);
-    loadAll();
+    setSaveError('');
+    try {
+      const payload = { ...form, description: 'Added via the Yatharth Emerald Stones admin panel.' };
+      if (editingId) await api.updateProduct(editingId, payload);
+      else await api.createProduct(payload);
+      setFormOpen(false);
+      loadAll();
+    } catch (err) {
+      // 401 = session expired → tell admin to log out and back in
+      if (err.message && err.message.includes('401')) {
+        setSaveError('Session expired — please log out and log back in, then try again.');
+      } else {
+        setSaveError(err.message || 'Could not save product. Please try again.');
+      }
+    }
   }
 
   async function handleFileSelect(e) {
@@ -166,7 +262,11 @@ function Panel({ logout }) {
       }
       setForm((f) => ({ ...f, images: [...f.images, ...uploaded] }));
     } catch (err) {
-      setUploadError(err.message);
+      if (err.message && (err.message.includes('401') || err.message.toLowerCase().includes('unauthorized'))) {
+        setUploadError('Session expired — please Log out and log back in, then try uploading again.');
+      } else {
+        setUploadError(err.message);
+      }
     } finally {
       setUploading(false);
     }
@@ -190,6 +290,7 @@ function Panel({ logout }) {
           <button className={tab === 'categories' ? 'active' : ''} onClick={() => setTab('categories')}>Categories</button>
           <button className={tab === 'inquiries' ? 'active' : ''} onClick={() => setTab('inquiries')}>Quote requests</button>
           <button className={tab === 'messages' ? 'active' : ''} onClick={() => setTab('messages')}>Contact messages</button>
+          <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>Settings</button>
         </aside>
 
         <div className="admin-content">
@@ -286,6 +387,9 @@ function Panel({ logout }) {
               </tbody>
             </table>
           )}
+
+          {tab === 'settings' && <SettingsPanel />}
+
         </div>
       </div>
 
@@ -320,47 +424,125 @@ function Panel({ logout }) {
                 <input required placeholder="e.g. Polished" value={form.finish} onChange={(e) => setForm({ ...form, finish: e.target.value })} />
               </div>
 
+              {/* ── IMAGE MANAGER ─────────────────────────────────────────── */}
               <div className="field">
-                <label>Photos ({form.images.length}/{MAX_IMAGES})</label>
+                <label>
+                  Product Images ({form.images.length}/{MAX_IMAGES})
+                  {form.images.length > 0 && (
+                    <span style={{ fontWeight: 400, color: 'var(--stone-grey)', marginLeft: 8, fontSize: 10.5, textTransform: 'none', letterSpacing: 0 }}>
+                      First image = primary (shown in catalog &amp; home)
+                    </span>
+                  )}
+                </label>
+
+                {/* Image grid */}
                 {form.images.length > 0 && (
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 10, marginBottom: 12 }}>
                     {form.images.map((img, i) => (
-                      <div key={img + i} style={{ position: 'relative', width: 64, height: 64 }}>
+                      <div key={img + i} style={{ position: 'relative', borderRadius: 4, overflow: 'hidden', border: i === 0 ? '2px solid var(--gold)' : '1px solid var(--line-soft)', background: '#f5f5f3' }}>
+                        {/* Primary badge */}
+                        {i === 0 && (
+                          <div style={{ position: 'absolute', top: 4, left: 4, background: 'var(--gold)', color: '#1A1A18', fontSize: 9, fontFamily: "'IBM Plex Mono',monospace", fontWeight: 600, padding: '2px 6px', borderRadius: 2, zIndex: 2, letterSpacing: '0.04em' }}>
+                            PRIMARY
+                          </div>
+                        )}
+                        {/* Image preview */}
                         <img
                           src={assetUrl(img)}
-                          alt=""
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 3, border: '1px solid var(--line-soft)' }}
+                          alt={`Product image ${i + 1}`}
+                          style={{ width: '100%', height: 90, objectFit: 'cover', display: 'block' }}
                         />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(i)}
-                          style={{
-                            position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%',
-                            background: 'var(--sandstone)', color: '#fff', fontSize: 13, lineHeight: 1,
-                          }}
-                          aria-label="Remove photo"
-                        >
-                          &times;
-                        </button>
+                        {/* Action row */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 6px', background: '#fff', borderTop: '1px solid var(--line-soft)' }}>
+                          {/* Reorder buttons */}
+                          <div style={{ display: 'flex', gap: 2 }}>
+                            <button
+                              type="button"
+                              onClick={() => moveImage(i, i - 1)}
+                              disabled={i === 0}
+                              title="Move left (set as primary)"
+                              style={{ background: 'none', border: '1px solid var(--line-soft)', borderRadius: 2, width: 20, height: 20, fontSize: 10, cursor: i === 0 ? 'default' : 'pointer', opacity: i === 0 ? 0.3 : 1, color: 'var(--ink)' }}
+                            >←</button>
+                            <button
+                              type="button"
+                              onClick={() => moveImage(i, i + 1)}
+                              disabled={i === form.images.length - 1}
+                              title="Move right"
+                              style={{ background: 'none', border: '1px solid var(--line-soft)', borderRadius: 2, width: 20, height: 20, fontSize: 10, cursor: i === form.images.length - 1 ? 'default' : 'pointer', opacity: i === form.images.length - 1 ? 0.3 : 1, color: 'var(--ink)' }}
+                            >→</button>
+                          </div>
+                          {/* Delete button */}
+                          <button
+                            type="button"
+                            onClick={() => removeImage(i)}
+                            title="Remove image"
+                            style={{ background: 'none', border: 'none', color: '#C0392B', fontSize: 14, lineHeight: 1, cursor: 'pointer', padding: '0 2px' }}
+                            aria-label="Remove image"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
+
+                {/* Upload button */}
                 {form.images.length < MAX_IMAGES && (
-                  <input type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={handleFileSelect} disabled={uploading} />
+                  <label style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px',
+                    border: '1.5px dashed var(--gold)', borderRadius: 3, cursor: uploading ? 'not-allowed' : 'pointer',
+                    color: 'var(--gold)', fontSize: 13, fontWeight: 600, opacity: uploading ? 0.6 : 1,
+                    background: 'rgba(201,168,76,0.04)', marginBottom: 8,
+                  }}>
+                    <span style={{ fontSize: 18, lineHeight: 1 }}>+</span>
+                    {form.images.length === 0 ? 'Upload Images' : `Add More (${MAX_IMAGES - form.images.length} remaining)`}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      multiple
+                      onChange={handleFileSelect}
+                      disabled={uploading}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
                 )}
-                {uploading && <p style={{ fontSize: 12.5, color: 'var(--stone-grey)', marginTop: 6 }}>Uploading…</p>}
-                {uploadError && <p style={{ fontSize: 12.5, color: 'var(--sandstone)', marginTop: 6 }}>{uploadError}</p>}
-                {form.images.length === 0 && !uploading && (
-                  <p style={{ fontSize: 12.5, color: 'var(--stone-grey)', marginTop: 6 }}>
-                    No photos yet — the product will show a generated stone texture until you add one.
+
+                {/* Status messages */}
+                {uploading && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--stone-grey)', marginTop: 4 }}>
+                    <span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid var(--gold)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                    {uploadProgress || 'Uploading…'}
+                  </div>
+                )}
+                {uploadError && (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12.5, color: '#C0392B', marginTop: 6, padding: '8px 10px', background: 'rgba(192,57,43,0.06)', border: '1px solid rgba(192,57,43,0.2)', borderRadius: 3 }}>
+                    <span style={{ flexShrink: 0, fontWeight: 700 }}>⚠</span>
+                    <span>{uploadError}</span>
+                  </div>
+                )}
+                {form.images.length === 0 && !uploading && !uploadError && (
+                  <p style={{ fontSize: 12, color: 'var(--stone-grey)', marginTop: 4, lineHeight: 1.5 }}>
+                    No photos yet — the product will show a generated stone texture until you add one.<br />
+                    <span style={{ fontSize: 11 }}>Max {MAX_IMAGES} images · JPG, PNG or WEBP · up to {MAX_SIZE_MB} MB each</span>
+                  </p>
+                )}
+                {form.images.length > 0 && !uploading && (
+                  <p style={{ fontSize: 11, color: 'var(--stone-grey)', marginTop: 4 }}>
+                    Use ← → to reorder. The first image is the primary shown in listings.
                   </p>
                 )}
               </div>
+              {/* ── END IMAGE MANAGER ──────────────────────────────────────── */}
 
-              <button className="btn btn-brass" style={{ width: '100%' }} type="submit" disabled={uploading}>
-                Save product
+      <button className="btn btn-gold" style={{ width: '100%' }} type="submit" disabled={uploading}>
+                {uploading ? 'Please wait for upload to finish…' : 'Save product'}
               </button>
+              {saveError && (
+                <div style={{ marginTop: 10, padding: '10px 12px', background: 'rgba(192,57,43,0.07)', border: '1px solid rgba(192,57,43,0.25)', borderRadius: 3, fontSize: 13, color: '#C0392B' }}>
+                  ⚠ {saveError}
+                </div>
+              )}
             </form>
           </div>
         </div>
@@ -582,6 +764,82 @@ function Stat({ n, label }) {
     <div className="stat">
       <div className="num">{n}</div>
       <div className="lbl">{label}</div>
+    </div>
+  );
+}
+
+function SettingsPanel() {
+  const [email, setEmail] = useState('');
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [testStatus, setTestStatus] = useState('');
+
+  useEffect(() => {
+    api.getSettings()
+      .then((s) => setEmail(s.notificationEmail || ''))
+      .catch(() => setError('Could not load settings.'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleSaveSettings(e) {
+    e.preventDefault();
+    setError('');
+    setSaved(false);
+    try {
+      await api.updateSettings({ notificationEmail: email });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  return (
+    <div style={{ maxWidth: 520 }}>
+      <h3 style={{ fontSize: 18, marginBottom: 6, fontFamily: "'Fraunces',serif" }}>Notification Settings</h3>
+      <p style={{ fontSize: 13.5, color: 'var(--stone-grey)', marginBottom: 28, lineHeight: 1.6 }}>
+        Every new quote request and contact message will be emailed to this address instantly.
+        Leave blank to disable email notifications (enquiries still save to the database).
+      </p>
+
+      {loading ? (
+        <p style={{ color: 'var(--stone-grey)', fontSize: 14 }}>Loading…</p>
+      ) : (
+        <form onSubmit={handleSaveSettings}>
+          <div className="field">
+            <label>Notification email address</label>
+            <input
+              type="email"
+              placeholder="e.g. yourname@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          {error && <p style={{ color: 'var(--rust)', fontSize: 13, marginBottom: 12 }}>{error}</p>}
+          {saved && (
+            <p style={{ color: '#2E7D32', fontSize: 13, marginBottom: 12 }}>
+              ✓ Saved — new enquiries will be sent to {email || 'nobody (notifications off)'}
+            </p>
+          )}
+          <button className="btn btn-gold" type="submit">Save email address</button>
+        </form>
+      )}
+
+      <div style={{ marginTop: 36, padding: 20, background: 'var(--ivory-dim)', borderRadius: 4, border: '1px solid var(--line-soft)' }}>
+        <h4 style={{ fontSize: 14, marginBottom: 10 }}>Email setup checklist</h4>
+        <ol style={{ fontSize: 13.5, color: 'var(--stone-grey)', lineHeight: 1.9, paddingLeft: 18 }}>
+          <li>Open <code style={{ background: '#fff', padding: '1px 5px', borderRadius: 2, fontSize: 12 }}>backend/.env</code> in VS Code</li>
+          <li>Set <code style={{ background: '#fff', padding: '1px 5px', borderRadius: 2, fontSize: 12 }}>MAIL_USER</code> = your Gmail address</li>
+          <li>Set <code style={{ background: '#fff', padding: '1px 5px', borderRadius: 2, fontSize: 12 }}>MAIL_PASS</code> = Gmail App Password (16-char code)</li>
+          <li>Restart the backend server (<code style={{ background: '#fff', padding: '1px 5px', borderRadius: 2, fontSize: 12 }}>Ctrl+C</code> then <code style={{ background: '#fff', padding: '1px 5px', borderRadius: 2, fontSize: 12 }}>npm run dev</code>)</li>
+          <li>Enter the delivery email above and click Save</li>
+          <li>Submit a test quote from the catalog to verify</li>
+        </ol>
+        <p style={{ fontSize: 12.5, color: 'var(--stone-grey)', marginTop: 10 }}>
+          Don't have a Gmail App Password yet? See the instructions in <code style={{ fontSize: 12 }}>backend/.env.example</code> — it takes about 2 minutes to generate one.
+        </p>
+      </div>
     </div>
   );
 }

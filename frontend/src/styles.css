@@ -379,3 +379,7 @@ tbody tr:hover{background:var(--gold-pale);}
   .hero-slide-bg,.hero-inner{transition:none !important;}
   .hero-dot{transition:none !important;}
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
